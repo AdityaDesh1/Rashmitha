@@ -13,8 +13,6 @@
     --red: #ff2244;
     --gold: #ffd700;
     --cyan: #00fff7;
-    --bg: #000;
-    --text: #fff;
   }
 
   html, body {
@@ -23,441 +21,517 @@
     background: #000;
     color: #fff;
     font-family: 'Share Tech Mono', monospace;
-    cursor: default;
   }
 
-  /* ─── CANVAS LAYER ─── */
+  /* ── CANVAS ── */
   #particleCanvas {
     position: fixed; inset: 0;
     pointer-events: none;
     z-index: 0;
   }
 
-  /* ─── SCENES ─── */
-  .scene {
+  /* ── FILM GRAIN ── */
+  #filmgrain {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    opacity: 0.35;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none; z-index: 999;
+  }
+
+  /* ── VIGNETTE ── */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none; z-index: 5;
+  }
+
+  /* ── SCENES ── */
+  /* .scene {
     position: fixed; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     opacity: 0; pointer-events: none;
     z-index: 10;
-    transition: opacity 0.6s ease;
     padding: 1.5rem;
     text-align: center;
   }
   .scene.active {
     opacity: 1; pointer-events: all;
-  }
+  } */
 
-  /* ─── FLICKER ─── */
+  .scene {
+  position: fixed;
+  inset: 0;
+  display: none;   /* 🔥 IMPORTANT */
+  opacity: 0;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.scene.active {
+  display: flex;   /* 🔥 Only active scene visible */
+  opacity: 1;
+}
+
+  /* ── FLICKER ── */
   @keyframes flicker {
-    0%,100%{opacity:1} 5%{opacity:.85} 10%{opacity:1} 20%{opacity:.9}
-    25%{opacity:1} 60%{opacity:.95} 65%{opacity:1} 80%{opacity:.88} 85%{opacity:1}
+    0%,100%{opacity:1} 7%{opacity:.82} 12%{opacity:1}
+    22%{opacity:.9} 27%{opacity:1} 62%{opacity:.94}
+    67%{opacity:1} 82%{opacity:.86} 87%{opacity:1}
   }
-  .flicker { animation: flicker 4s infinite; }
+  .flicker { animation: flicker 5s infinite; }
 
-  /* ─── SCANLINES overlay ─── */
-  body::after {
-    content:''; position:fixed; inset:0;
-    background: repeating-linear-gradient(
-      0deg, transparent, transparent 2px,
-      rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
-    );
-    pointer-events:none; z-index:999;
-  }
-
-  /* ─── SCENE 1: INTRO ─── */
+  /* ════════════════════════════
+     SCENE 1 — INTRO
+  ════════════════════════════ */
   #s1 { background: radial-gradient(ellipse at 50% 60%, #0d0010 0%, #000 70%); }
+
   #typeText {
     font-family: 'Cinzel Decorative', serif;
-    font-size: clamp(1rem, 3.5vw, 1.8rem);
+    font-size: clamp(1rem, 3.2vw, 1.75rem);
     color: #c8a0ff;
     letter-spacing: 0.05em;
-    max-width: 700px;
-    line-height: 1.7;
-    text-shadow: 0 0 30px #9b30ff88;
-    min-height: 4em;
+    max-width: 680px;
+    line-height: 1.85;
+    text-shadow: 0 0 30px #9b30ff66;
+    white-space: pre-line;
+    min-height: 6em;
   }
-  .cursor-blink { animation: blink 0.8s infinite; }
-  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
-  #filmgrain {
-    position:fixed;inset:0;pointer-events:none;z-index:1;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctave[...]
-    opacity: 0.4;
+  .cursor-blink { animation: blink 0.75s steps(1) infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ════════════════════════════
+     SCENE 2 — BUILDUP
+  ════════════════════════════ */
+  #s2 { background: radial-gradient(ellipse at 50% 40%, #0a0000 0%, #000 80%); }
+
+  #pulse-ring {
+    position: absolute;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,40,40,0.35);
+    animation: pulseRing 1.3s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes pulseRing {
+    0%  { transform: scale(0.8); opacity: 0.8; }
+    100%{ transform: scale(2.6); opacity: 0; }
   }
 
-  /* ─── SCENE 2: BUILDUP ─── */
-  #s2 { background: radial-gradient(ellipse at 50% 40%, #0a0000 0%, #000 80%); }
   .stat-line {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(1.5rem, 6vw, 3.8rem);
+    font-size: clamp(1.6rem, 6vw, 3.8rem);
     letter-spacing: 0.08em;
     opacity: 0;
     transform: translateX(-60px);
-    transition: opacity 0.5s, transform 0.5s;
+    transition: opacity 0.5s ease, transform 0.5s ease;
     display: flex; gap: 1rem; align-items: center;
   }
-  .stat-line.visible { opacity:1; transform: translateX(0); }
+  .stat-line.visible { opacity: 1; transform: translateX(0); }
   .stat-check { color: #00ff88; }
+  .stat-miss  { color: #ff4444; }
   .stat-label { color: #fff; }
-  .stat-status { color: #ffd700; }
-  #pulse-ring {
-    position: absolute;
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    border: 3px solid rgba(255,30,30,0.3);
-    animation: pulseRing 1.2s ease-out infinite;
-  }
-  @keyframes pulseRing {
-    0%{transform:scale(0.8);opacity:0.8}
-    100%{transform:scale(2.5);opacity:0}
-  }
+  .stat-ok    { color: #ffd700; }
+  .stat-bad   { color: #ff4444; }
 
-  /* ─── SCENE 3: EXPLOSION ─── */
+  /* ════════════════════════════
+     SCENE 3 — EXPLOSION
+  ════════════════════════════ */
   #s3 { background: #000; }
+
   #boom-text {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 18vw, 12rem);
+    font-size: clamp(4rem, 18vw, 11rem);
     color: #ff4400;
-    text-shadow: 0 0 40px #ff4400, 0 0 80px #ff8800, 0 0 160px #ff0000;
-    animation: boomPop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    text-shadow: 0 0 40px #ff4400, 0 0 80px #ff8800, 0 0 150px #ff000088;
+    animation: boomPop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
     letter-spacing: -0.02em;
   }
   @keyframes boomPop {
-    0%{transform:scale(0) rotate(-10deg);opacity:0}
-    60%{transform:scale(1.3) rotate(3deg)}
-    80%{transform:scale(0.95) rotate(-1deg)}
-    100%{transform:scale(1) rotate(0deg);opacity:1}
+    0%  { transform: scale(0) rotate(-12deg); opacity: 0; }
+    60% { transform: scale(1.35) rotate(4deg); }
+    80% { transform: scale(0.93) rotate(-1deg); }
+    100%{ transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  @keyframes shake {
-    0%,100%{transform:translate(0,0) rotate(0deg)}
-    10%{transform:translate(-12px,6px) rotate(-2deg)}
-    20%{transform:translate(10px,-8px) rotate(1.5deg)}
-    30%{transform:translate(-8px,10px) rotate(-1deg)}
-    40%{transform:translate(12px,-5px) rotate(2deg)}
-    50%{transform:translate(-10px,8px) rotate(-1.5deg)}
-    60%{transform:translate(8px,-10px) rotate(1deg)}
-    70%{transform:translate(-6px,6px) rotate(-0.5deg)}
-    80%{transform:translate(10px,-4px) rotate(0.8deg)}
-    90%{transform:translate(-4px,8px) rotate(-0.3deg)}
-  }
-  .shaking { animation: shake 0.6s ease both; }
 
-  /* ─── SCENE 4: BOSS REVEAL ─── */
+  @keyframes shake {
+    0%,100%{ transform: translate(0,0) rotate(0deg); }
+    10%{ transform: translate(-13px, 7px) rotate(-2.5deg); }
+    20%{ transform: translate(11px,-9px) rotate(2deg); }
+    30%{ transform: translate(-9px, 11px) rotate(-1.5deg); }
+    40%{ transform: translate(13px,-6px) rotate(2.5deg); }
+    50%{ transform: translate(-11px, 9px) rotate(-2deg); }
+    60%{ transform: translate(9px,-11px) rotate(1.5deg); }
+    70%{ transform: translate(-7px, 7px) rotate(-0.8deg); }
+    80%{ transform: translate(11px,-5px) rotate(1deg); }
+    90%{ transform: translate(-5px, 9px) rotate(-0.4deg); }
+  }
+  .shaking { animation: shake 0.65s ease both; }
+
+  /* ════════════════════════════
+     SCENE 4 — BOSS REVEAL
+  ════════════════════════════ */
   #s4 { background: radial-gradient(ellipse at 50% 40%, #1a0000 0%, #000 70%); }
+
   #bossTitle {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(1.4rem, 5.5vw, 3.5rem);
-    color: #fff;
+    font-size: clamp(1.5rem, 5.5vw, 3.5rem);
     letter-spacing: 0.06em;
-    line-height: 1.2;
-    animation: redFlash 0.8s infinite;
-    max-width: 900px;
-    text-shadow: 0 0 20px #ff0000, 0 0 50px #ff000088;
+    line-height: 1.25;
+    max-width: 860px;
+    animation: redFlash 0.9s infinite;
   }
   @keyframes redFlash {
-    0%,100%{color:#fff;text-shadow:0 0 20px #ff0000,0 0 50px #ff000088}
-    50%{color:#ff3333;text-shadow:0 0 40px #ff0000,0 0 100px #ff0000,0 0 160px #ff000044}
+    0%,100%{ color: #fff; text-shadow: 0 0 20px #ff0000, 0 0 50px #ff000055; }
+    50%    { color: #ff3333; text-shadow: 0 0 40px #ff0000, 0 0 100px #ff0000, 0 0 160px #ff000033; }
   }
   .boss-sub {
-    font-family:'Share Tech Mono',monospace;
-    font-size:clamp(0.8rem,2.5vw,1.1rem);
-    color:#ff6644;margin-top:1.5rem;opacity:0.9;letter-spacing:0.1em;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.75rem, 2.2vw, 1rem);
+    color: #ff6644;
+    margin-top: 1.5rem;
+    letter-spacing: 0.12em;
+    opacity: 0.85;
   }
 
-  /* ─── SCENE 5: STATS ─── */
+  /* ════════════════════════════
+     SCENE 5 — STATS
+  ════════════════════════════ */
   #s5 { background: radial-gradient(ellipse at 30% 60%, #000d1a 0%, #000 80%); }
+
   #s5 h2 {
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(1.8rem,5vw,3rem);
-    color:#00fff7;letter-spacing:0.1em;
-    text-shadow:0 0 20px #00fff7;
-    margin-bottom:2rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: #00fff7;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 20px #00fff7;
+    margin-bottom: 2rem;
   }
+
+  #statsWrap {
+    display: flex; flex-direction: column; align-items: center; width: 100%;
+  }
+
   .stat-card {
-    width: min(500px, 95vw);
+    width: min(500px, 94vw);
     background: rgba(0,255,247,0.04);
-    border: 1px solid rgba(0,255,247,0.15);
+    border: 1px solid rgba(0,255,247,0.14);
     border-radius: 8px;
     padding: 0.9rem 1.2rem;
     margin-bottom: 1rem;
     text-align: left;
-    opacity:0; transform:translateY(20px);
-    transition: opacity 0.5s, transform 0.5s;
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
   }
-  .stat-card.visible { opacity:1; transform:translateY(0); }
+  .stat-card.visible { opacity: 1; transform: translateY(0); }
+
   .stat-card-label {
-    font-size:clamp(0.75rem,2vw,0.9rem);
-    color:#aaa;letter-spacing:0.1em;margin-bottom:0.5rem;
-    display:flex;justify-content:space-between;
+    font-size: clamp(0.72rem, 1.9vw, 0.88rem);
+    color: #999;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    display: flex; justify-content: space-between;
   }
-  .stat-card-label span { color:#fff;font-weight:700; }
+  .stat-card-label span { color: #fff; font-weight: 700; }
+
   .bar-track {
-    height:16px;background:rgba(255,255,255,0.06);
-    border-radius:8px;overflow:hidden;
+    height: 15px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    overflow: hidden;
   }
   .bar-fill {
-    height:100%;width:0%;border-radius:8px;
-    transition:width 1.5s cubic-bezier(0.22,1,0.36,1);
+    height: 100%; width: 0%;
+    border-radius: 8px;
+    transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .bar-stress .bar-fill { background: linear-gradient(90deg,#ff4400,#ff0000); }
-  .bar-sleep .bar-fill { background: linear-gradient(90deg,#4444ff,#8800ff); }
-  .bar-caffeine .bar-fill { background: linear-gradient(90deg,#664400,#ff8800); }
-  .bar-brain .bar-fill { background: linear-gradient(90deg,#00aa44,#00ffaa); }
+  .bar-stress   .bar-fill { background: linear-gradient(90deg, #ff4400, #ff0000); }
+  .bar-sleep    .bar-fill { background: linear-gradient(90deg, #4444ff, #8800ff); }
+  .bar-caffeine .bar-fill { background: linear-gradient(90deg, #664400, #ff8800); }
+  .bar-brain    .bar-fill { background: linear-gradient(90deg, #00aa44, #00ffaa); }
 
-  /* ─── SCENE 6: STORY TWIST ─── */
+  /* ════════════════════════════
+     SCENE 6 — STORY TWIST
+  ════════════════════════════ */
   #s6 { background: radial-gradient(ellipse at 60% 40%, #001a0d 0%, #000 70%); }
+
   .twist-line {
-    font-family:'Nunito',sans-serif;
-    font-size:clamp(1rem,3vw,1.6rem);
-    line-height:1.7;max-width:700px;
-    opacity:0;transform:translateY(15px);
-    transition:opacity 0.6s,transform 0.6s;
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(1rem, 3vw, 1.6rem);
+    line-height: 1.75;
+    max-width: 680px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
   }
-  .twist-line.visible{opacity:1;transform:translateY(0);}
-  .twist-line.big{font-size:clamp(1.3rem,4vw,2.2rem);font-weight:900;color:#00ff88;}
-  .twist-line.funny{color:#ffd700;font-weight:700;}
-  .twist-line+.twist-line{margin-top:1.2rem;}
+  .twist-line.visible { opacity: 1; transform: translateY(0); }
+  .twist-line.big    { font-size: clamp(1.3rem, 4vw, 2.1rem); font-weight: 900; color: #00ff88; }
+  .twist-line.funny  { color: #ffd700; font-weight: 700; }
+  .twist-line + .twist-line { margin-top: 1.2rem; }
 
-  /* ─── SCENE 7: FAKE WARNING ─── */
+  /* ════════════════════════════
+     SCENE 7 — FAKE WARNING
+  ════════════════════════════ */
   #s7 { background: #000; }
+
   #glitch-box {
-    width:min(560px,92vw);
-    background:#0a0a0a;
-    border:2px solid #ff2244;
-    border-radius:6px;
-    padding:2rem;
-    box-shadow:0 0 30px #ff224444,inset 0 0 20px #ff000011;
-    position:relative;
-    overflow:hidden;
+    width: min(560px, 92vw);
+    background: #080808;
+    border: 2px solid #ff2244;
+    border-radius: 6px;
+    padding: 2rem;
+    box-shadow: 0 0 30px #ff224433, inset 0 0 20px #ff000011;
+    position: relative;
+    overflow: hidden;
   }
+  /* moving scanline on warning box only */
   #glitch-box::before {
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(transparent 0%,rgba(255,0,0,0.03) 50%,transparent 100%);
-    animation:scanline 3s linear infinite;
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(transparent 0%, rgba(255,0,0,0.04) 50%, transparent 100%);
+    animation: scanline 2.8s linear infinite;
+    pointer-events: none;
   }
-  @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
-  .warning-header{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(1.5rem,5vw,2.5rem);
-    color:#ff2244;letter-spacing:0.1em;
-    text-shadow:0 0 20px #ff2244;
-    animation:glitchText 2s infinite;
-  }
-  @keyframes glitchText{
-    0%,90%,100%{text-shadow:0 0 20px #ff2244;transform:none}
-    91%{text-shadow:-3px 0 #00fff7,3px 0 #ff2244;transform:translate(-2px,0)}
-    93%{text-shadow:3px 0 #ff00ff,-3px 0 #ff2244;transform:translate(3px,0)}
-    95%{text-shadow:-2px 0 #00fff7,2px 0 #ff2244;transform:translate(-1px,0)}
-    97%{transform:none;text-shadow:0 0 20px #ff2244}
-  }
-  .warning-body{
-    font-size:clamp(0.85rem,2.5vw,1rem);
-    color:#ccc;margin-top:1rem;line-height:1.8;
-  }
-  .warning-body strong{color:#ff6644;}
-  .progress-fake{
-    margin-top:1.2rem;
-    height:10px;background:rgba(255,255,255,0.08);
-    border-radius:5px;overflow:hidden;
-  }
-  .progress-fake-fill{
-    height:100%;width:0%;
-    background:linear-gradient(90deg,#ff2244,#ff8844);
-    animation:fakeFill 3s ease forwards 0.5s;
-    border-radius:5px;
-  }
-  @keyframes fakeFill{0%{width:0%}100%{width:100%}}
+  @keyframes scanline { 0%{ transform: translateY(-100%); } 100%{ transform: translateY(100%); } }
 
-  /* ─── SCENE 8: CHOICE ─── */
+  .warning-header {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    color: #ff2244;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 18px #ff2244;
+    animation: glitchText 2.5s infinite;
+  }
+  @keyframes glitchText {
+    0%,88%,100%{ text-shadow: 0 0 18px #ff2244; transform: none; }
+    89%{ text-shadow: -3px 0 #00fff7, 3px 0 #ff2244; transform: translate(-2px, 0); }
+    91%{ text-shadow: 3px 0 #ff00ff, -3px 0 #ff2244; transform: translate(3px, 0); }
+    93%{ text-shadow: -2px 0 #00fff7, 2px 0 #ff2244; transform: translate(-1px, 0); }
+    95%{ transform: none; text-shadow: 0 0 18px #ff2244; }
+  }
+
+  .warning-body {
+    font-size: clamp(0.82rem, 2.3vw, 0.98rem);
+    color: #ccc;
+    margin-top: 1rem;
+    line-height: 1.85;
+  }
+  .warning-body strong { color: #ff6644; }
+
+  .progress-fake {
+    margin-top: 1.2rem;
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .progress-fake-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #ff2244, #ff8844);
+    border-radius: 5px;
+    transition: width 3.5s ease;
+  }
+
+  /* ════════════════════════════
+     SCENE 8 — CHOICE
+  ════════════════════════════ */
   #s8 { background: radial-gradient(ellipse at 50% 50%, #0a000a 0%, #000 70%); }
-  #s8 h2{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(2rem,6vw,4rem);
-    letter-spacing:0.08em;color:#ffd700;
-    text-shadow:0 0 30px #ffd70088;
-    margin-bottom:0.5rem;
-  }
-  #s8 p{
-    font-size:clamp(0.85rem,2.5vw,1.1rem);
-    color:#aaa;margin-bottom:2.5rem;letter-spacing:0.05em;
-  }
-  .choice-btns{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;}
-  .choice-btn{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(1.1rem,3.5vw,1.8rem);
-    letter-spacing:0.12em;
-    padding:1rem 2.5rem;border:none;
-    border-radius:6px;cursor:pointer;
-    position:relative;overflow:hidden;
-    transition:transform 0.2s,box-shadow 0.2s;
-  }
-  .choice-btn::after{
-    content:'';position:absolute;inset:0;
-    background:rgba(255,255,255,0.1);
-    transform:translateX(-110%);
-    transition:transform 0.3s;
-  }
-  .choice-btn:hover::after{transform:translateX(0);}
-  .choice-btn:hover{transform:scale(1.06);}
-  #btnSubmit{
-    background:linear-gradient(135deg,#00aa44,#00ff88);
-    color:#000;
-    box-shadow:0 0 25px #00ff8844;
-  }
-  #btnSubmit:hover{box-shadow:0 0 50px #00ff88aa;}
-  #btnCry{
-    background:linear-gradient(135deg,#222,#444);
-    color:#aaa;border:1px solid #555;
-  }
-  #btnCry:hover{box-shadow:0 0 25px #ffffff22;}
-  #choice-response{
-    margin-top:2rem;
-    font-size:clamp(1rem,3vw,1.4rem);
-    color:#ff8844;
-    opacity:0;transition:opacity 0.5s;
-    font-family:'Nunito',sans-serif;font-weight:700;
-  }
-  #choice-response.show{opacity:1;}
 
-  /* ─── SCENE 9: CELEBRATION ─── */
-  #s9{
-    background: radial-gradient(ellipse at 50% 40%, #002200 0%, #000 60%);
+  #s8 h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: 0.08em;
+    color: #ffd700;
+    text-shadow: 0 0 30px #ffd70077;
+    margin-bottom: 0.5rem;
   }
-  #s9 h2{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(3rem,12vw,8rem);
-    color:#00ff88;letter-spacing:0.05em;
-    text-shadow:0 0 40px #00ff88,0 0 100px #00ff8866;
-    animation:celebPulse 1s ease-in-out infinite alternate;
-  }
-  @keyframes celebPulse{
-    from{text-shadow:0 0 40px #00ff88,0 0 100px #00ff8866}
-    to{text-shadow:0 0 80px #00ff88,0 0 200px #00ff8899,0 0 300px #00ff8833}
-  }
-  #s9 p{font-size:clamp(1rem,3vw,1.5rem);color:#aaffcc;margin-top:1rem;}
-  #nextBtn{
-    margin-top:2.5rem;
-    font-family:'Bebas Neue',sans-serif;
-    font-size:1.4rem;letter-spacing:0.1em;
-    padding:0.8rem 2.5rem;
-    background:transparent;border:2px solid #00ff88;
-    color:#00ff88;border-radius:6px;cursor:pointer;
-    transition:all 0.3s;
-  }
-  #nextBtn:hover{background:#00ff8822;box-shadow:0 0 30px #00ff8866;}
-
-  /* ─── SCENE 10 + 11: FINAL ─── */
-  #s10{
-    background:radial-gradient(ellipse at 50% 40%,#0d0a00 0%,#000 70%);
-  }
-  .final-msg{
-    max-width:700px;
-    font-family:'Nunito',sans-serif;
-  }
-  .final-msg .crown{
-    font-size:clamp(3rem,10vw,6rem);
-    display:block;margin-bottom:0.5rem;
-    animation:float 3s ease-in-out infinite;
-  }
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-  .final-msg h1{
-    font-family:'Cinzel Decorative',serif;
-    font-size:clamp(1.5rem,4.5vw,3rem);
-    color:#ffd700;
-    text-shadow:0 0 30px #ffd70066;
-    line-height:1.2;margin-bottom:1.5rem;
-  }
-  .final-msg p{
-    font-size:clamp(0.9rem,2.5vw,1.15rem);
-    color:#ddd;line-height:1.9;
-  }
-  .final-msg p strong{color:#ffd700;}
-  .final-msg p .name{color:#00fff7;font-weight:900;}
-  .breaking-news{
-    margin-top:3rem;
-    padding:0.8rem 1.5rem;
-    border:1px solid #ffd70044;
-    border-radius:4px;
-    background:rgba(255,215,0,0.04);
-    font-size:clamp(0.7rem,1.8vw,0.85rem);
-    color:#ffd700aa;letter-spacing:0.06em;
-  }
-  .breaking-news span{color:#ffd700;font-weight:700;}
-  .ticker{animation:ticker 0.6s ease-in-out infinite alternate;}
-  @keyframes ticker{from{opacity:0.6}to{opacity:1}}
-
-  /* ─── SOUND TOGGLE ─── */
-  #soundBtn{
-    position:fixed;top:1rem;right:1rem;
-    z-index:1000;
-    background:rgba(255,255,255,0.07);
-    border:1px solid rgba(255,255,255,0.15);
-    color:#fff;padding:0.4rem 0.9rem;
-    border-radius:20px;font-size:0.75rem;
-    cursor:pointer;letter-spacing:0.08em;
-    font-family:'Share Tech Mono',monospace;
-    transition:background 0.2s;
-    display:none;
-  }
-  #soundBtn:hover{background:rgba(255,255,255,0.15);}
-
-  /* ─── SKIP BUTTON ─── */
-  #skipBtn{
-    position:fixed;bottom:1rem;right:1rem;
-    z-index:1000;
-    background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.1);
-    color:#555;padding:0.35rem 0.8rem;
-    border-radius:20px;font-size:0.65rem;
-    cursor:pointer;letter-spacing:0.08em;
-    font-family:'Share Tech Mono',monospace;
-    transition:all 0.2s;
-  }
-  #skipBtn:hover{color:#aaa;border-color:#aaa;}
-
-  /* ─── CONFETTI ─── */
-  .confetti-piece{
-    position:fixed;
-    width:10px;height:10px;
-    border-radius:2px;
-    pointer-events:none;
-    z-index:500;
-    animation:confettiFall var(--dur,3s) ease-in var(--delay,0s) forwards;
-  }
-  @keyframes confettiFall{
-    0%{transform:translate(var(--x,0),var(--sy,-100px)) rotate(0deg);opacity:1}
-    100%{transform:translate(calc(var(--x,0) + var(--drift,0px)),100vh) rotate(var(--rot,360deg));opacity:0}
+  #s8 p {
+    font-size: clamp(0.82rem, 2.3vw, 1.05rem);
+    color: #888;
+    margin-bottom: 2.5rem;
+    letter-spacing: 0.06em;
   }
 
-  /* ─── FIREWORK ─── */
-  .fw-particle{
-    position:fixed;
-    width:6px;height:6px;border-radius:50%;
-    pointer-events:none;z-index:500;
-    animation:fwFly var(--dur,1s) ease-out var(--delay,0s) forwards;
+  .choice-btns { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+
+  .choice-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.1rem, 3.5vw, 1.8rem);
+    letter-spacing: 0.12em;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  @keyframes fwFly{
-    0%{transform:translate(0,0);opacity:1}
-    100%{transform:translate(var(--dx,0),var(--dy,0));opacity:0}
+  .choice-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-110%);
+    transition: transform 0.3s;
+  }
+  .choice-btn:hover::after { transform: translateX(0); }
+  .choice-btn:hover { transform: scale(1.06); }
+
+  #btnSubmit {
+    background: linear-gradient(135deg, #00aa44, #00ff88);
+    color: #000;
+    box-shadow: 0 0 25px #00ff8833;
+  }
+  #btnSubmit:hover { box-shadow: 0 0 50px #00ff88aa; }
+
+  #btnCry {
+    background: linear-gradient(135deg, #1c1c1c, #383838);
+    color: #999;
+    border: 1px solid #444;
+  }
+  #btnCry:hover { box-shadow: 0 0 20px rgba(255,255,255,0.12); }
+
+  #choice-response {
+    margin-top: 2rem;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: #ff8844;
+    opacity: 0;
+    transition: opacity 0.5s;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    min-height: 2em;
+  }
+  #choice-response.show { opacity: 1; }
+
+  /* ════════════════════════════
+     SCENE 9 — CELEBRATION
+  ════════════════════════════ */
+  #s9 { background: radial-gradient(ellipse at 50% 40%, #001a00 0%, #000 65%); }
+
+  #s9 h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 8rem);
+    color: #00ff88;
+    letter-spacing: 0.05em;
+    animation: celebPulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes celebPulse {
+    from{ text-shadow: 0 0 40px #00ff88, 0 0 100px #00ff8855; }
+    to  { text-shadow: 0 0 80px #00ff88, 0 0 200px #00ff8888, 0 0 300px #00ff8822; }
+  }
+  #s9 p { font-size: clamp(1rem, 3vw, 1.5rem); color: #aaffcc; margin-top: 1rem; }
+
+  #nextBtn {
+    margin-top: 2.5rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+    padding: 0.8rem 2.5rem;
+    background: transparent;
+    border: 2px solid #00ff88;
+    color: #00ff88;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #nextBtn:hover { background: #00ff8822; box-shadow: 0 0 30px #00ff8866; }
+
+  /* ════════════════════════════
+     SCENE 10 — FINAL
+  ════════════════════════════ */
+  #s10 { background: radial-gradient(ellipse at 50% 40%, #0e0b00 0%, #000 70%); }
+
+  .final-msg { max-width: 700px; font-family: 'Nunito', sans-serif; }
+
+  .final-msg .crown {
+    font-size: clamp(3rem, 10vw, 6rem);
+    display: block; margin-bottom: 0.4rem;
+    animation: float 3.2s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-13px); } }
+
+  .final-msg h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.5rem, 4.5vw, 3rem);
+    color: #ffd700;
+    text-shadow: 0 0 30px #ffd70055;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+  .final-msg p {
+    font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+    color: #ddd;
+    line-height: 1.95;
+  }
+  .final-msg p strong { color: #ffd700; }
+  .name-highlight { color: #00fff7; font-weight: 900; }
+
+  .breaking-news {
+    margin-top: 2.8rem;
+    padding: 0.8rem 1.5rem;
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 4px;
+    background: rgba(255,215,0,0.03);
+    font-size: clamp(0.68rem, 1.7vw, 0.83rem);
+    color: rgba(255,215,0,0.6);
+    letter-spacing: 0.06em;
+  }
+  .ticker-label {
+    color: #ffd700;
+    font-weight: 700;
+    animation: tickAnim 0.7s ease-in-out infinite alternate;
+  }
+  @keyframes tickAnim { from{ opacity: 0.6; } to{ opacity: 1; } }
+
+  /* ════════════════════════════
+     SOUND BUTTON
+  ════════════════════════════ */
+  #soundBtn {
+    position: fixed; top: 1rem; right: 1rem;
+    z-index: 1000;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    font-family: 'Share Tech Mono', monospace;
+    transition: background 0.2s;
+    display: none;
+  }
+  #soundBtn:hover { background: rgba(255,255,255,0.14); }
+
+  /* ════════════════════════════
+     CONFETTI
+  ════════════════════════════ */
+  .confetti-piece {
+    position: fixed;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 500;
+    animation: confettiFall var(--dur, 3s) ease-in var(--delay, 0s) forwards;
+  }
+  @keyframes confettiFall {
+    0%  { transform: translate(0, -30px) rotate(0deg); opacity: 1; }
+    100%{ transform: translate(var(--drift, 0px), 105vh) rotate(var(--rot, 360deg)); opacity: 0; }
   }
 
-  /* ─── PROGRESS BAR CONTAINER ─── */
-  #statsWrap{
-    display:flex;flex-direction:column;align-items:center;
-    width:100%;
-  }
-
-  /* ─── VIGNETTE ─── */
-  body::before{
-    content:'';position:fixed;inset:0;
-    background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,0.75) 100%);
-    pointer-events:none;z-index:5;
-  }
-
-  /* ─── MOBILE TWEAKS ─── */
-  @media(max-width:480px){
-    .choice-btns{flex-direction:column;align-items:center;}
-    .choice-btn{width:220px;text-align:center;}
+  /* ════════════════════════════
+     MOBILE
+  ════════════════════════════ */
+  @media (max-width: 480px) {
+    .choice-btns { flex-direction: column; align-items: center; }
+    .choice-btn  { width: 230px; text-align: center; }
   }
 </style>
 </head>
@@ -465,48 +539,49 @@
 
 <canvas id="particleCanvas"></canvas>
 <div id="filmgrain"></div>
-<button id="soundBtn">🔊 SOUND ON</button>
-<button id="skipBtn">skip intro ↓</button>
+<!-- <button id="soundBtn">🔊 SOUND ON</button> -->
 
-<!-- SCENE 1: INTRO -->
+<button id="soundBtn">🔇 SOUND OFF</button>
+
+<!-- ══ S1: INTRO ══ -->
 <div class="scene active flicker" id="s1">
   <div id="typeText"><span id="typeTarget"></span><span class="cursor-blink">▌</span></div>
 </div>
 
-<!-- SCENE 2: BUILDUP -->
+<!-- ══ S2: BUILDUP ══ -->
 <div class="scene" id="s2">
   <div id="pulse-ring"></div>
-  <div style="display:flex;flex-direction:column;gap:0.3rem;position:relative;z-index:2;">
+  <div style="display:flex;flex-direction:column;gap:0.4rem;position:relative;z-index:2;">
     <div class="stat-line" id="sl1">
       <span class="stat-check">✔</span>
       <span class="stat-label">ASSIGNMENTS...</span>
-      <span class="stat-status">COMPLETED.</span>
+      <span class="stat-ok">COMPLETED.</span>
     </div>
     <div class="stat-line" id="sl2">
       <span class="stat-check">✔</span>
       <span class="stat-label">DEADLINES...</span>
-      <span class="stat-status">SURVIVED.</span>
+      <span class="stat-ok">SURVIVED.</span>
     </div>
     <div class="stat-line" id="sl3">
-      <span style="color:#ff4444;">✘</span>
+      <span class="stat-miss">✘</span>
       <span class="stat-label">SLEEP...</span>
-      <span style="color:#ff4444;">MISSING.</span>
+      <span class="stat-bad">MISSING.</span>
     </div>
   </div>
 </div>
 
-<!-- SCENE 3: EXPLOSION -->
+<!-- ══ S3: EXPLOSION ══ -->
 <div class="scene" id="s3">
-  <div id="boom-text">💥 BOOM 💥</div>
+  <div id="boom-text">💥 RASHMITHA MODE 💥</div>
 </div>
 
-<!-- SCENE 4: BOSS REVEAL -->
+<!-- ══ S4: BOSS REVEAL ══ -->
 <div class="scene" id="s4">
   <div id="bossTitle">⚠️ FINAL BOSS UNLOCKED ⚠️<br>THESIS SUBMISSION</div>
-  <div class="boss-sub">// DIFFICULTY: LEGENDARY // NO CHECKPOINTS // NO SAVES //</div>
+  <div class="boss-sub">// DIFFICULTY: LEGENDARY &nbsp;·&nbsp; NO CHECKPOINTS &nbsp;·&nbsp; NO SAVES //</div>
 </div>
 
-<!-- SCENE 5: STATS -->
+<!-- ══ S5: STATS ══ -->
 <div class="scene" id="s5">
   <div id="statsWrap">
     <h2>📊 SYSTEM STATUS REPORT</h2>
@@ -529,20 +604,21 @@
   </div>
 </div>
 
-<!-- SCENE 6: STORY TWIST -->
+<!-- ══ S6: STORY TWIST ══ -->
 <div class="scene" id="s6">
   <div style="display:flex;flex-direction:column;align-items:center;">
-    <div class="twist-line big" id="t1">She chose Logistics &amp; Supply Chain Management...</div>
+    <div class="twist-line big"  id="t1">She chose Logistics &amp; Supply Chain Management...</div>
     <div class="twist-line funny" id="t2">But now... she IS the supply chain 😭</div>
-    <div class="twist-line" id="t3">Packages are moving, deadlines are chasing,</div>
-    <div class="twist-line" id="t4">and she is both the manager AND the delivery system 📦😆</div>
-    <div class="twist-line" id="t5" style="color:#aaa;font-size:0.9em;margin-top:1rem;">
-      Just-In-Time delivery of her final thesis:<br><em style="color:#00fff7">Due Date = NOW.</em>
+    <div class="twist-line"      id="t3">Packages are moving, deadlines are chasing,</div>
+    <div class="twist-line"      id="t4">and she is both the manager AND the delivery system 📦😆</div>
+    <div class="twist-line"      id="t5" style="color:#888;font-size:0.88em;margin-top:1.2rem;">
+      Just-In-Time delivery of her final thesis:<br>
+      <em style="color:#00fff7;">Due Date = NOW.</em>
     </div>
   </div>
 </div>
 
-<!-- SCENE 7: FAKE WARNING -->
+<!-- ══ S7: FAKE WARNING ══ -->
 <div class="scene" id="s7">
   <div id="glitch-box">
     <div class="warning-header">⚠️ SYSTEM WARNING ⚠️</div>
@@ -556,12 +632,12 @@
       &gt; Thesis quality: <strong>TOO POWERFUL</strong>
     </div>
     <div class="progress-fake">
-      <div class="progress-fake-fill"></div>
+      <div class="progress-fake-fill" id="pfill"></div>
     </div>
   </div>
 </div>
 
-<!-- SCENE 8: CHOICE -->
+<!-- ══ S8: CHOICE ══ -->
 <div class="scene" id="s8">
   <h2>THE MOMENT OF TRUTH</h2>
   <p>// choose your action wisely, thesis warrior //</p>
@@ -572,14 +648,14 @@
   <div id="choice-response"></div>
 </div>
 
-<!-- SCENE 9: CELEBRATION -->
+<!-- ══ S9: CELEBRATION ══ -->
 <div class="scene" id="s9">
   <h2>🎉 SHE DID IT! 🎉</h2>
   <p>Thesis submitted. Legend status: UNLOCKED.</p>
   <button id="nextBtn">SEE FINAL MESSAGE →</button>
 </div>
 
-<!-- SCENE 10: FINAL -->
+<!-- ══ S10: FINAL ══ -->
 <div class="scene" id="s10">
   <div class="final-msg">
     <span class="crown">👑</span>
@@ -589,133 +665,131 @@
       You survived it all. Every late night,<br>
       every "I'll sleep after this chapter,"<br>
       every cold coffee and confused Excel sheet — <strong>worth it.</strong><br><br>
-      <span class="name">Rashmitha Radhakrishna</span>, you did it!<br>
+      <span class="name-highlight">Rashmitha Radhakrishna</span>, you did it!<br>
       Future <strong>Supply Chain Queen 👑</strong><br>
       London saw you come, study, and <strong>CONQUER.</strong>
     </p>
     <div class="breaking-news">
-      <span class="ticker">📡 BREAKING NEWS:</span>
-      London logistics efficiency improved 300% after Rashmitha took control 😌📦
+      <span class="ticker-label">📡 BREAKING NEWS:</span>
+      &nbsp;London logistics efficiency improved 300% after Rashmitha took control 😌📦
     </div>
   </div>
 </div>
 
 <script>
-/* ══════════════════════════════════════════
+/* ══════════════════════════════
    AUDIO ENGINE
-══════════════════════════════════════════ */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
+══════════════════════════════ */
+const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-let soundOn = false;
+let soundOn  = false;
 
 function getCtx() {
-  if (!audioCtx) audioCtx = new AudioCtx();
+  if (!audioCtx) audioCtx = new AudioCtxClass();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
-function playTone(freq, type, duration, vol=0.15, delay=0) {
+function playTone(freq, type, duration, vol = 0.15, delayS = 0) {
   if (!soundOn) return;
   try {
-    const ctx = getCtx();
-    const osc = ctx.createOscillator();
+    const ctx  = getCtx();
+    const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
     osc.type = type; osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
-    osc.start(ctx.currentTime + delay);
-    osc.stop(ctx.currentTime + delay + duration + 0.05);
-  } catch(e){}
+    const t = ctx.currentTime + delayS;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    osc.start(t); osc.stop(t + duration + 0.05);
+  } catch(e) {}
 }
 
 function playHeartbeat() {
-  if (!soundOn) return;
-  playTone(80,'sine',0.1,0.3,0);
-  playTone(100,'sine',0.08,0.25,0.12);
+  playTone(80,  'sine', 0.1, 0.28, 0);
+  playTone(100, 'sine', 0.08, 0.22, 0.13);
 }
 
 function playExplosion() {
   if (!soundOn) return;
   try {
     const ctx = getCtx();
-    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.8, ctx.sampleRate);
-    const d = buf.getChannelData(0);
-    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
-    const src = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.9, ctx.sampleRate);
+    const d   = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++)
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.2);
+    const src  = ctx.createBufferSource();
     const gain = ctx.createGain();
     src.buffer = buf; src.connect(gain); gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(0.5,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+    gain.gain.setValueAtTime(0.55, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
     src.start();
-  } catch(e){}
+  } catch(e) {}
 }
 
 function playVictory() {
-  if (!soundOn) return;
-  const notes = [523,659,784,1047,1319];
-  notes.forEach((f,i) => playTone(f,'triangle',0.3,0.2,i*0.18));
+  [523, 659, 784, 1047, 1319].forEach((f, i) =>
+    playTone(f, 'triangle', 0.35, 0.2, i * 0.2));
 }
 
-function playWarning() {
-  playTone(440,'sawtooth',0.15,0.1,0);
-  playTone(400,'sawtooth',0.15,0.1,0.2);
+function playAlarm() {
+  playTone(440, 'sawtooth', 0.18, 0.12, 0);
+  playTone(400, 'sawtooth', 0.18, 0.12, 0.22);
 }
 
-const soundBtn = document.getElementById('soundBtn');
-soundBtn.addEventListener('click', () => {
+document.getElementById('soundBtn').addEventListener('click', function () {
   soundOn = !soundOn;
-  if (soundOn) { getCtx(); if (audioCtx.state==='suspended') audioCtx.resume(); }
-  soundBtn.textContent = soundOn ? '🔊 SOUND ON' : '🔇 SOUND OFF';
+  if (soundOn) getCtx();
+  this.textContent = soundOn ? '🔊 SOUND ON' : '🔇 SOUND OFF';
 });
 
-/* ══════════════════════════════════════════
+/* ══════════════════════════════
    PARTICLE CANVAS
-══════════════════════════════════════════ */
+══════════════════════════════ */
 const canvas = document.getElementById('particleCanvas');
-const ctx2 = canvas.getContext('2d');
+const ctx2   = canvas.getContext('2d');
 let particles = [];
 let W, H;
 
 function resize() {
-  W = canvas.width = window.innerWidth;
+  W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener('resize', resize);
 
-function addStars(count=80) {
-  for(let i=0;i<count;i++){
-    particles.push({
-      x: Math.random()*W, y: Math.random()*H,
-      r: Math.random()*1.5+0.3,
-      a: Math.random(), da: (Math.random()-0.5)*0.005,
-      type:'star'
-    });
-  }
+// Seed twinkling stars
+for (let i = 0; i < 90; i++) {
+  particles.push({
+    type: 'star',
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.4 + 0.3,
+    a: Math.random(),
+    da: (Math.random() - 0.5) * 0.005
+  });
 }
-addStars();
 
 function animParticles() {
-  ctx2.clearRect(0,0,W,H);
-  particles = particles.filter(p=>{
-    if(p.type==='star'){
-      p.a += p.da;
-      if(p.a<0)p.a=0;if(p.a>1)p.a=1;
+  ctx2.clearRect(0, 0, W, H);
+  particles = particles.filter(p => {
+    if (p.type === 'star') {
+      p.a = Math.max(0, Math.min(1, p.a + p.da));
       ctx2.beginPath();
-      ctx2.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx2.fillStyle=`rgba(255,255,255,${p.a*0.6})`;
+      ctx2.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx2.fillStyle = `rgba(255,255,255,${p.a * 0.55})`;
       ctx2.fill();
       return true;
     }
-    if(p.type==='fw'){
-      p.life -= 0.025;
-      p.x += p.vx; p.y += p.vy; p.vy += 0.12;
+    if (p.type === 'fw') {
+      p.life -= 0.022;
+      p.x += p.vx; p.y += p.vy; p.vy += 0.1;
       ctx2.beginPath();
-      ctx2.arc(p.x,p.y,p.r*(p.life),0,Math.PI*2);
-      ctx2.fillStyle=`hsla(${p.hue},100%,65%,${p.life})`;
+      ctx2.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      ctx2.fillStyle = `hsla(${p.hue},100%,65%,${p.life})`;
       ctx2.fill();
-      return p.life>0;
+      return p.life > 0;
     }
     return false;
   });
@@ -723,229 +797,346 @@ function animParticles() {
 }
 animParticles();
 
-function fireFireworks(count=6) {
-  for(let f=0;f<count;f++){
-    setTimeout(()=>{
-      const cx = W*0.15 + Math.random()*W*0.7;
-      const cy = H*0.1 + Math.random()*H*0.5;
-      const hue = Math.random()*360;
-      for(let i=0;i<50;i++){
-        const angle = (Math.PI*2/50)*i;
-        const speed = 3+Math.random()*4;
+function fireFireworks(count = 6) {
+  for (let f = 0; f < count; f++) {
+    setTimeout(() => {
+      const cx  = W * 0.15 + Math.random() * W * 0.7;
+      const cy  = H * 0.08 + Math.random() * H * 0.5;
+      const hue = Math.random() * 360;
+      for (let i = 0; i < 55; i++) {
+        const angle = (Math.PI * 2 / 55) * i;
+        const speed = 3 + Math.random() * 4.5;
         particles.push({
-          type:'fw', x:cx, y:cy,
-          vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
-          r:3+Math.random()*2, life:1, hue
+          type: 'fw', x: cx, y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 3 + Math.random() * 2,
+          life: 1, hue
         });
       }
-    }, f*400);
+    }, f * 420);
   }
 }
 
-/* ══════════════════════════════════════════
-   CONFETTI DOM
-══════════════════════════════════════════ */
-function launchConfetti(count=100) {
-  const colors=['#ff2244','#ffd700','#00fff7','#ff8800','#00ff88','#ff44cc'];
-  for(let i=0;i<count;i++){
-    const el=document.createElement('div');
-    el.className='confetti-piece';
-    el.style.cssText=`
-      left:${Math.random()*100}vw;
-      top:-20px;
-      background:${colors[Math.floor(Math.random()*colors.length)]};
-      --x:${(Math.random()-0.5)*40}px;
-      --sy:-${20+Math.random()*40}px;
-      --drift:${(Math.random()-0.5)*200}px;
-      --rot:${Math.random()*720}deg;
-      --dur:${2+Math.random()*3}s;
-      --delay:${Math.random()*2}s;
-      transform:rotate(${Math.random()*360}deg);
-      width:${6+Math.random()*10}px;
-      height:${6+Math.random()*10}px;
+/* ══════════════════════════════
+   CONFETTI
+══════════════════════════════ */
+const CONFETTI_COLORS = ['#ff2244','#ffd700','#00fff7','#ff8800','#00ff88','#ff44cc','#44aaff'];
+
+function launchConfetti(count = 90) {
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const w = 6 + Math.random() * 10;
+    const h = 6 + Math.random() * 10;
+    el.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      top: -15px;
+      width: ${w}px; height: ${h}px;
+      background: ${CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]};
+      --drift: ${(Math.random() - 0.5) * 220}px;
+      --rot: ${Math.random() * 720 - 360}deg;
+      --dur: ${2.2 + Math.random() * 3}s;
+      --delay: ${Math.random() * 1.8}s;
+      transform: rotate(${Math.random() * 360}deg);
     `;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 6000);
+    setTimeout(() => el.remove(), 6500);
   }
 }
 
-/* ══════════════════════════════════════════
-   TYPING
-══════════════════════════════════════════ */
-function typeWrite(text, el, speed=45, append=false) {
-  return new Promise(res => {
-    let i=0;
-    if(!append) el.textContent='';
-    const t = setInterval(()=>{
-      el.textContent += text[i++];
-      if(i>=text.length){ clearInterval(t); res(); }
-    }, speed);
+/* ══════════════════════════════
+   TYPEWRITER — single clean pass
+══════════════════════════════ */
+// function typeWrite(lines, el, speed = 48) {
+//   return new Promise(resolve => {
+//     el.textContent = '';
+//     const fullText = lines.join('\n');
+//     let i = 0;
+//     const timer = setInterval(() => {
+//       el.textContent += fullText[i++];
+//       if (i >= fullText.length) { clearInterval(timer); resolve(); }
+//     }, speed);
+//   });
+// }
+
+function typeWrite(lines, el, speed = 50) {
+  return new Promise(resolve => {
+    el.textContent = '';
+    let lineIndex = 0;
+    let charIndex = 0;
+
+    function type() {
+      if (lineIndex < lines.length) {
+        if (charIndex < lines[lineIndex].length) {
+          el.textContent += lines[lineIndex][charIndex];
+          charIndex++;
+          setTimeout(type, speed);
+        } else {
+          el.textContent += '\n';
+          lineIndex++;
+          charIndex = 0;
+          setTimeout(type, 400); // pause between lines
+        }
+      } else {
+        resolve();
+      }
+    }
+
+    type();
   });
 }
 
-/* ══════════════════════════════════════════
-   SCENE MANAGER
-══════════════════════════════════════════ */
-let currentScene = 1;
-const scenes = {};
-for(let i=1;i<=10;i++) scenes[i]=document.getElementById('s'+i);
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function goTo(n) {
-  Object.values(scenes).forEach(s=>s.classList.remove('active'));
-  if(scenes[n]) scenes[n].classList.add('active');
-  currentScene=n;
+// function fadeToNext(el, next) {
+//   el.style.transition = 'opacity 0.55s ease';
+//   el.style.opacity    = '0';
+//   setTimeout(() => {
+//     el.style.transition = '';
+//     el.style.opacity    = '';
+//     el.classList.remove('active');
+//     next();
+//   }, 580);
+// }
+
+function fadeToNext(el, next){
+  el.style.opacity = '0';
+
+  setTimeout(() => {
+    el.classList.remove('active');
+    el.style.display = 'none';   // 🔥 remove from render
+    next();
+  }, 550);
 }
 
-/* ══════════════════════════════════════════
-   SCENE SEQUENCES
-══════════════════════════════════════════ */
+/* ══════════════════════════════
+   SCENE REGISTRY
+══════════════════════════════ */
+const SCENES = {};
+for (let i = 1; i <= 10; i++) SCENES[i] = document.getElementById('s' + i);
 
-// S1 → S2
-async function runS1(){
-  goTo(1);
-  soundBtn.style.display='block';
-  const el = document.getElementById('typeTarget');
-  await delay(600);
-  await typeWrite("Somewhere in London...", el, 60);
-  await delay(400);
-  await typeWrite("\nRashmitha Radhakrishna is facing", el, 50, true);
-  await delay(200);
-  await typeWrite(" her ultimate destiny...", el, 40, true);
-  await delay(2200);
-  fadeOut(scenes[1], runS2);
+// function showScene(n) {
+//   Object.values(SCENES).forEach(s => s.classList.remove('active'));
+//   SCENES[n].classList.add('active');
+// }
+
+function showScene(n) {
+  Object.values(SCENES).forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';   // 🔥 force hide
+  });
+
+  const current = SCENES[n];
+  current.style.display = 'flex'; // 🔥 force show
+
+  requestAnimationFrame(() => {
+    current.classList.add('active');
+  });
 }
 
-// S2
-async function runS2(){
-  goTo(2);
-  const lines=[
-    {id:'sl1', delay:400},
-    {id:'sl2', delay:900},
-    {id:'sl3', delay:1400}
-  ];
-  let hbInterval = setInterval(()=>playHeartbeat(),1200);
-  for(const l of lines){
-    await delay(l.delay);
-    document.getElementById(l.id).classList.add('visible');
-  }
-  await delay(2200);
-  clearInterval(hbInterval);
-  fadeOut(scenes[2], runS3);
+/* ══════════════════════════════
+   S1 — INTRO
+══════════════════════════════ */
+async function runS1() {
+  showScene(1);
+  document.getElementById('soundBtn').style.display = 'block';
+  await wait(700);
+  await typeWrite(
+    ['Somewhere in London...', 'Rashmitha Radhakrishna is facing', 'her ultimate destiny...'],
+    document.getElementById('typeTarget'),
+    55
+  );
+  await wait(2400);
+  fadeToNext(SCENES[1], runS2);
 }
 
-// S3
-async function runS3(){
-  goTo(3);
+/* ══════════════════════════════
+   S2 — BUILDUP
+══════════════════════════════ */
+async function runS2() {
+  showScene(2);
+  // Reset states
+  ['sl1','sl2','sl3'].forEach(id => document.getElementById(id).classList.remove('visible'));
+
+  let hbTimer = setInterval(playHeartbeat, 1200);
+
+  await wait(400);  document.getElementById('sl1').classList.add('visible');
+  await wait(900);  document.getElementById('sl2').classList.add('visible');
+  await wait(1400); document.getElementById('sl3').classList.add('visible');
+  await wait(2400);
+
+  clearInterval(hbTimer);
+  fadeToNext(SCENES[2], runS3);
+}
+
+/* ══════════════════════════════
+   S3 — EXPLOSION
+══════════════════════════════ */
+async function runS3() {
+  showScene(3);
   document.body.classList.add('shaking');
   playExplosion();
-  launchConfetti(60);
-  await delay(300);
+  launchConfetti(55);
+  await wait(320);
   document.body.classList.remove('shaking');
-  await delay(1400);
-  fadeOut(scenes[3], runS4);
+  await wait(1500);
+  fadeToNext(SCENES[3], runS4);
 }
 
-// S4
-async function runS4(){
-  goTo(4);
-  playWarning();
-  await delay(3000);
-  fadeOut(scenes[4], runS5);
+/* ══════════════════════════════
+   S4 — BOSS REVEAL
+══════════════════════════════ */
+async function runS4() {
+  showScene(4);
+  playAlarm();
+  await wait(3200);
+  fadeToNext(SCENES[4], runS5);
 }
 
-// S5
-async function runS5(){
-  goTo(5);
-  const cards=['sc1','sc2','sc3','sc4'];
-  const bars=[{id:'b1',w:'100%'},{id:'b2',w:'8%'},{id:'b3',w:'98%'},{id:'b4',w:'100%'}];
-  for(let i=0;i<cards.length;i++){
-    await delay(i*300+200);
-    document.getElementById(cards[i]).classList.add('visible');
-    setTimeout(()=>{
-      document.getElementById(bars[i].id).style.width=bars[i].w;
-    },100);
+/* ══════════════════════════════
+   S5 — STATS
+══════════════════════════════ */
+async function runS5() {
+  showScene(5);
+
+  // Reset all cards and bars
+  const cardIds = ['sc1','sc2','sc3','sc4'];
+  const barIds  = ['b1','b2','b3','b4'];
+  cardIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('visible');
+  });
+  barIds.forEach(id => {
+    document.getElementById(id).style.width = '0%';
+  });
+
+  const barWidths = ['100%', '8%', '98%', '100%'];
+
+//   for (let i = 0; i < cardIds.length; i++) {
+//     await wait(i * 320 + 200);
+//     document.getElementById(cardIds[i]).classList.add('visible');
+//     // Slight delay so transition triggers after card appears
+//     await wait(60);
+//     document.getElementById(barIds[i]).style.width = barWidths[i];
+//   }
+
+for (let i = 0; i < cardIds.length; i++) {
+  await wait(300);
+
+  const card = document.getElementById(cardIds[i]);
+  const bar = document.getElementById(barIds[i]);
+
+  card.classList.add('visible');
+
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+
+  void bar.offsetWidth; // force reflow
+
+  bar.style.transition = 'width 1.6s cubic-bezier(0.22,1,0.36,1)';
+  bar.style.width = barWidths[i];
+}
+  await wait(4000);
+  fadeToNext(SCENES[5], runS6);
+}
+
+/* ══════════════════════════════
+   S6 — STORY TWIST
+══════════════════════════════ */
+async function runS6() {
+  showScene(6);
+  const ids = ['t1','t2','t3','t4','t5'];
+  ids.forEach(id => document.getElementById(id).classList.remove('visible'));
+
+  for (let i = 0; i < ids.length; i++) {
+    // await wait(i * 750 + 200);
+    await wait(750);
+    document.getElementById(ids[i]).classList.add('visible');
   }
-  await delay(3800);
-  fadeOut(scenes[5], runS6);
+
+  await wait(3000);
+  fadeToNext(SCENES[6], runS7);
 }
 
-// S6
-async function runS6(){
-  goTo(6);
-  const lines=['t1','t2','t3','t4','t5'];
-  for(let i=0;i<lines.length;i++){
-    await delay(i*700+200);
-    document.getElementById(lines[i]).classList.add('visible');
-  }
-  await delay(3000);
-  fadeOut(scenes[6], runS7);
+/* ══════════════════════════════
+   S7 — FAKE WARNING
+══════════════════════════════ */
+async function runS7() {
+  showScene(7);
+  playAlarm();
+
+  // Reset progress bar via DOM replacement trick
+//   const fill = document.getElementById('pfill');
+//   fill.style.transition = 'none';
+//   fill.style.width = '0%';
+//   // Force reflow then animate
+//   void fill.offsetWidth;
+//   fill.style.transition = 'width 3.5s ease';
+//   setTimeout(() => { fill.style.width = '100%'; }, 80);
+
+const fill = document.getElementById('pfill');
+
+fill.style.transition = 'none';
+fill.style.width = '0%';
+
+void fill.offsetWidth; // force reflow
+
+fill.style.transition = 'width 3.5s ease';
+setTimeout(() => {
+  fill.style.width = '100%';
+}, 50);
+
+  await wait(4800);
+  fadeToNext(SCENES[7], runS8);
 }
 
-// S7
-async function runS7(){
-  goTo(7);
-  playWarning();
-  await delay(4500);
-  fadeOut(scenes[7], runS8);
+/* ══════════════════════════════
+   S8 — CHOICE
+══════════════════════════════ */
+function runS8() {
+  showScene(8);
+  document.getElementById('choice-response').textContent = '';
+  document.getElementById('choice-response').classList.remove('show');
+  document.getElementById('btnSubmit').onclick = () => runS9();
+  document.getElementById('btnCry').onclick    = handleCry;
 }
 
-// S8
-function runS8(){
-  goTo(8);
-  document.getElementById('btnSubmit').onclick = handleSubmit;
-  document.getElementById('btnCry').onclick = handleCry;
-}
-
-function handleCry(){
+function handleCry() {
   const r = document.getElementById('choice-response');
-  r.textContent = "Nice try Rashmitha 😏  No escape from submission! The thesis awaits!";
+  r.textContent = 'Nice try Rashmitha 😏  No escape from submission!';
   r.classList.add('show');
-  playTone(200,'sawtooth',0.4,0.15);
-  setTimeout(()=>{ r.classList.remove('show'); },3000);
+  playTone(200, 'sawtooth', 0.4, 0.15);
+  setTimeout(() => r.classList.remove('show'), 3200);
 }
 
-function handleSubmit(){
-  runS9();
-}
-
-// S9
-async function runS9(){
-  goTo(9);
+/* ══════════════════════════════
+   S9 — CELEBRATION
+══════════════════════════════ */
+function runS9() {
+  showScene(9);
   playVictory();
-  launchConfetti(120);
+  launchConfetti(130);
   fireFireworks(8);
-  document.getElementById('nextBtn').onclick = ()=>fadeOut(scenes[9], runS10);
+  document.getElementById('nextBtn').onclick = () => fadeToNext(SCENES[9], runS10);
 }
 
-// S10
-function runS10(){
-  goTo(10);
-  launchConfetti(80);
-  fireFireworks(5);
+/* ══════════════════════════════
+   S10 — FINAL
+══════════════════════════════ */
+function runS10() {
+  showScene(10);
+  launchConfetti(90);
+  fireFireworks(6);
   playVictory();
 }
 
-/* ══════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════ */
-function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function fadeOut(el, next){
-  el.style.transition='opacity 0.5s ease';
-  el.style.opacity='0';
-  setTimeout(()=>{ el.style.opacity=''; next(); }, 550);
-}
-
-/* ══════════════════════════════════════════
-   SKIP
-══════════════════════════════════════════ */
-document.getElementById('skipBtn').addEventListener('click',()=>{
-  runS8();
-  document.getElementById('skipBtn').style.display='none';
-});
-
-/* ══════════════════════════════════════════
-   START
-══════════════════════════════════════════ */
+/* ══════════════════════════════
+   KICK OFF
+══════════════════════════════ */
 runS1();
 </script>
 </body>
